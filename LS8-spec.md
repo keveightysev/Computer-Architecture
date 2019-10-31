@@ -4,23 +4,21 @@
 
 8 general-purpose 8-bit numeric registers R0-R7.
 
-* R5 is reserved as the interrupt mask (IM)
-* R6 is reserved as the interrupt status (IS)
-* R7 is reserved as the stack pointer (SP)
+- R5 is reserved as the interrupt mask (IM)
+- R6 is reserved as the interrupt status (IS)
+- R7 is reserved as the stack pointer (SP)
 
 > These registers only hold values between 0-255. After performing math on
 > registers in the emulator, bitwise-AND the result with 0xFF (255) to keep the
 > register values in that range.
 
-
 ## Internal Registers
 
-* `PC`: Program Counter, address of the currently executing instruction
-* `IR`: Instruction Register, contains a copy of the currently executing instruction
-* `MAR`: Memory Address Register, holds the memory address we're reading or writing
-* `MDR`: Memory Data Register, holds the value to write or the value just read
-* `FL`: Flags, see below
-
+- `PC`: Program Counter, address of the currently executing instruction
+- `IR`: Instruction Register, contains a copy of the currently executing instruction
+- `MAR`: Memory Address Register, holds the memory address we're reading or writing
+- `MDR`: Memory Data Register, holds the value to write or the value just read
+- `FL`: Flags, see below
 
 ## Flags
 
@@ -31,13 +29,12 @@ The register is made up of 8 bits. If a particular bit is set, that flag is "tru
 
 `FL` bits: `00000LGE`
 
-* `L` Less-than: during a `CMP`, set to 1 if registerA is less than registerB,
+- `L` Less-than: during a `CMP`, set to 1 if registerA is less than registerB,
   zero otherwise.
-* `G` Greater-than: during a `CMP`, set to 1 if registerA is greater than
+- `G` Greater-than: during a `CMP`, set to 1 if registerA is greater than
   registerB, zero otherwise.
-* `E` Equal: during a `CMP`, set to 1 if registerA is equal to registerB, zero
+- `E` Equal: during a `CMP`, set to 1 if registerA is equal to registerB, zero
   otherwise.
-
 
 ## Memory
 
@@ -45,7 +42,7 @@ The LS-8 has 8-bit addressing, so can address 256 bytes of RAM total.
 
 Memory map:
 
-```
+```c
       top of RAM
 +-----------------------+
 | FF  I7 vector         |    Interrupt vector table
@@ -73,7 +70,6 @@ Memory map:
 
 The SP points at the value at the top of the stack (most recently pushed), or at
 address `F4` if the stack is empty.
-
 
 ## Interrupts
 
@@ -109,18 +105,18 @@ See `IRET`, below, for returning from an interrupt.
 
 ### Interrupt numbers
 
-* 0: Timer interrupt. This interrupt triggers once per second.
-* 1: Keyboard interrupt. This interrupt triggers when a key is pressed.
+- 0: Timer interrupt. This interrupt triggers once per second.
+- 1: Keyboard interrupt. This interrupt triggers when a key is pressed.
   The value of the key pressed is stored in address `0xF4`.
 
 ## Power on State
 
 When the LS-8 is booted, the following steps occur:
 
-* `R0`-`R6` are cleared to `0`.
-* `R7` is set to `0xF4`.
-* `PC` and `FL` registers are cleared to `0`.
-* RAM is cleared to `0`.
+- `R0`-`R6` are cleared to `0`.
+- `R7` is set to `0xF4`.
+- `PC` and `FL` registers are cleared to `0`.
+- RAM is cleared to `0`.
 
 Subsequently, the program can be loaded into RAM starting at address `0x00`.
 
@@ -134,17 +130,17 @@ Subsequently, the program can be loaded into RAM starting at address `0x00`.
 
 Some instructions set the PC directly. These are:
 
-* CALL
-* INT
-* IRET
-* JMP
-* JNE
-* JEQ
-* JGT
-* JGE
-* JLT
-* JLE
-* RET
+- CALL
+- INT
+- IRET
+- JMP
+- JNE
+- JEQ
+- JGT
+- JGE
+- JLT
+- JLE
+- RET
 
 In these cases, the `PC` does not automatically advance to the next instruction,
 since it was set explicitly.
@@ -153,10 +149,10 @@ since it was set explicitly.
 
 Meanings of the bits in the first byte of each instruction: `AABCDDDD`
 
-* `AA` Number of operands for this opcode, 0-2
-* `B` 1 if this is an ALU operation
-* `C` 1 if this instruction sets the PC
-* `DDDD` Instruction identifier
+- `AA` Number of operands for this opcode, 0-2
+- `B` 1 if this is an ALU operation
+- `C` 1 if this instruction sets the PC
+- `DDDD` Instruction identifier
 
 The number of operands `AA` is useful to know because the total number of bytes in any
 instruction is the number of operands + 1 (for the opcode). This
@@ -169,33 +165,34 @@ there are other ways to code it that don't do these checks.
 
 Glossary:
 
-* **immediate**: takes a constant integer value as an argument
-* **register**: takes a register number as an argument
+- **immediate**: takes a constant integer value as an argument
+- **register**: takes a register number as an argument
 
-* `iiiiiiii`: 8-bit immediate value
-* `00000rrr`: Register number
-* `00000aaa`: Register number
-* `00000bbb`: Register number
+- `iiiiiiii`: 8-bit immediate value
+- `00000rrr`: Register number
+- `00000aaa`: Register number
+- `00000bbb`: Register number
 
 Machine code values shown in both binary and hexadecimal.
 
 ### ADD
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `ADD registerA registerB`
 
 Add the value in two registers and store the result in registerA.
 
 Machine code:
-```
+
+```c
 10100000 00000aaa 00000bbb
 A0 0a 0b
 ```
 
 ### AND
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `AND registerA registerB`
 
@@ -203,7 +200,8 @@ Bitwise-AND the values in registerA and registerB, then store the result in
 registerA.
 
 Machine code:
-```
+
+```c
 10101000 00000aaa 00000bbb
 A8 0a 0b
 ```
@@ -214,55 +212,58 @@ A8 0a 0b
 
 Calls a subroutine (function) at the address stored in the register.
 
-1. The address of the ***instruction*** _directly after_ `CALL` is
+1. The address of the **_instruction_** _directly after_ `CALL` is
    pushed onto the stack. This allows us to return to where we left off when the subroutine finishes executing.
 2. The PC is set to the address stored in the given register. We jump to that location in RAM and execute the first instruction in the subroutine. The PC can move forward or backwards from its current location.
 
 Machine code:
-```
+
+```shell
 01010000 00000rrr
 50 0r
 ```
 
 ### CMP
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `CMP registerA registerB`
 
 Compare the values in two registers.
 
-* If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
+- If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
 
-* If registerA is less than registerB, set the Less-than `L` flag to 1,
+- If registerA is less than registerB, set the Less-than `L` flag to 1,
   otherwise set it to 0.
 
-* If registerA is greater than registerB, set the Greater-than `G` flag
+- If registerA is greater than registerB, set the Greater-than `G` flag
   to 1, otherwise set it to 0.
 
 Machine code:
-```
+
+```c
 10100111 00000aaa 00000bbb
 A7 0a 0b
 ```
 
 ### DEC
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `DEC register`
 
 Decrement (subtract 1 from) the value in the given register.
 
 Machine code:
-```
+
+```c
 01100110 00000rrr
 66 0r
 ```
 
 ### DIV
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `DIV registerA registerB`
 
@@ -273,7 +274,8 @@ If the value in the second register is 0, the system should print an
 error message and halt.
 
 Machine code:
-```
+
+```c
 10100011 00000aaa 00000bbb
 A3 0a 0b
 ```
@@ -285,21 +287,23 @@ A3 0a 0b
 Halt the CPU (and exit the emulator).
 
 Machine code:
-```
-00000001 
+
+```c
+00000001
 01
 ```
 
 ### INC
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `INC register`
 
 Increment (add 1 to) the value in the given register.
 
 Machine code:
-```
+
+```c
 01100101 00000rrr
 65 0r
 ```
@@ -310,11 +314,12 @@ Machine code:
 
 Issue the interrupt number stored in the given register.
 
-This will set the _n_th bit in the `IS` register to the value in the given
+This will set the \_n_th bit in the `IS` register to the value in the given
 register.
 
 Machine code:
-```
+
+```c
 01010010 00000rrr
 52 0r
 ```
@@ -333,7 +338,8 @@ The following steps are executed:
 4. Interrupts are re-enabled
 
 Machine code:
-```
+
+```c
 00010011
 13
 ```
@@ -345,7 +351,8 @@ Machine code:
 If `equal` flag is set (true), jump to the address stored in the given register.
 
 Machine code:
-```
+
+```c
 01010101 00000rrr
 55 0r
 ```
@@ -357,7 +364,7 @@ Machine code:
 If `greater-than` flag or `equal` flag is set (true), jump to the address stored
 in the given register.
 
-```
+```c
 01011010 00000rrr
 5A 0r
 ```
@@ -370,7 +377,8 @@ If `greater-than` flag is set (true), jump to the address stored in the given
 register.
 
 Machine code:
-```
+
+```c
 01010111 00000rrr
 57 0r
 ```
@@ -382,7 +390,7 @@ Machine code:
 If `less-than` flag or `equal` flag is set (true), jump to the address stored in the given
 register.
 
-```
+```c
 01011001 00000rrr
 59 0r
 ```
@@ -395,7 +403,8 @@ If `less-than` flag is set (true), jump to the address stored in the given
 register.
 
 Machine code:
-```
+
+```c
 01011000 00000rrr
 58 0r
 ```
@@ -409,7 +418,8 @@ Jump to the address stored in the given register.
 Set the `PC` to the address stored in the given register.
 
 Machine code:
-```
+
+```c
 01010100 00000rrr
 54 0r
 ```
@@ -422,7 +432,8 @@ If `E` flag is clear (false, 0), jump to the address stored in the given
 register.
 
 Machine code:
-```
+
+```c
 01010110 00000rrr
 56 0r
 ```
@@ -436,7 +447,8 @@ Loads registerA with the value at the memory address stored in registerB.
 This opcode reads from memory.
 
 Machine code:
-```
+
+```c
 10000011 00000aaa 00000bbb
 83 0a 0b
 ```
@@ -448,14 +460,15 @@ Machine code:
 Set the value of a register to an integer.
 
 Machine code:
-```
+
+```c
 10000010 00000rrr iiiiiiii
 82 0r ii
 ```
 
 ### MOD
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `MOD registerA registerB`
 
@@ -466,21 +479,23 @@ If the value in the second register is 0, the system should print an
 error message and halt.
 
 Machine code:
-```
+
+```c
 10100100 00000aaa 00000bbb
 A4 0a 0b
 ```
 
 ### MUL
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `MUL registerA registerB`
 
 Multiply the values in two registers together and store the result in registerA.
 
 Machine code:
-```
+
+```c
 10100010 00000aaa 00000bbb
 A2 0a 0b
 ```
@@ -492,28 +507,30 @@ A2 0a 0b
 No operation. Do nothing for this instruction.
 
 Machine code:
-```
+
+```c
 00000000
 00
 ```
 
 ### NOT
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `NOT register`
 
 Perform a bitwise-NOT on the value in a register.
 
 Machine code:
-```
+
+```c
 01101001 00000rrr
 69 0r
 ```
 
 ### OR
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `OR registerA registerB`
 
@@ -521,7 +538,8 @@ Perform a bitwise-OR between the values in registerA and registerB, storing the
 result in registerA.
 
 Machine code:
-```
+
+```c
 10101010 00000aaa 00000bbb
 AA 0a 0b
 ```
@@ -536,7 +554,8 @@ Pop the value at the top of the stack into the given register.
 2. Increment `SP`.
 
 Machine code:
-```
+
+```c
 01000110 00000rrr
 46 0r
 ```
@@ -551,7 +570,8 @@ Print to the console the ASCII character corresponding to the value in the
 register.
 
 Machine code:
-```
+
+```c
 01001000 00000rrr
 48 0r
 ```
@@ -566,7 +586,8 @@ Print to the console the decimal integer value that is stored in the given
 register.
 
 Machine code:
-```
+
+```c
 01000111 00000rrr
 47 0r
 ```
@@ -582,7 +603,8 @@ Push the value in the given register on the stack.
    `SP`.
 
 Machine code:
-```
+
+```c
 01000101 00000rrr
 45 0r
 ```
@@ -596,31 +618,32 @@ Return from subroutine.
 Pop the value from the top of the stack and store it in the `PC`.
 
 Machine Code:
-```
+
+```c
 00010001
 11
 ```
 
 ### SHL
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 Shift the value in registerA left by the number of bits specified in registerB,
 filling the low bits with 0.
 
-```
+```c
 10101100 00000aaa 00000bbb
 AC 0a 0b
 ```
 
 ### SHR
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 Shift the value in registerA right by the number of bits specified in registerB,
 filling the high bits with 0.
 
-```
+```c
 10101101 00000aaa 00000bbb
 AD 0a 0b
 ```
@@ -634,14 +657,15 @@ Store value in registerB in the address stored in registerA.
 This opcode writes to memory.
 
 Machine code:
-```
+
+```c
 10000100 00000aaa 00000bbb
 84 0a 0b
 ```
 
 ### SUB
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `SUB registerA registerB`
 
@@ -649,14 +673,15 @@ Subtract the value in the second register from the first, storing the
 result in registerA.
 
 Machine code:
-```
+
+```c
 10100001 00000aaa 00000bbb
 A1 0a 0b
 ```
 
 ### XOR
 
-*This is an instruction handled by the ALU.*
+_This is an instruction handled by the ALU._
 
 `XOR registerA registerB`
 
@@ -664,7 +689,8 @@ Perform a bitwise-XOR between the values in registerA and registerB, storing the
 result in registerA.
 
 Machine code:
-```
+
+```c
 10101011 00000aaa 00000bbb
 AB 0a 0b
 ```
